@@ -21,6 +21,13 @@ android {
         versionCode 1
         versionName "1.0"
     }
+
+    dependencies {
+        dependencies {
+            implementation "com.amap.api:location:latest.integration"
+        }
+    }
+
     lintOptions {
         abortOnError false
     }
