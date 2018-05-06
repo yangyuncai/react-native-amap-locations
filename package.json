@@ -1,18 +1,17 @@
 
 {
-  "name": "react-native-react-native-amap-locations",
-  "version": "1.0.0",
-  "description": "",
+  "name": "react-native-amap-locations",
+  "version": "0.1.0",
+  "description": "lite location wrapper above amap SDK.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "react-native"
   ],
-  "author": "",
-  "license": "",
+  "author": "huang.jian",
+  "license": "hjj491229492@hotmail.com",
   "peerDependencies": {
-    "react-native": "^0.41.2"
+    "react-native": "~0.55.2"
   }
 }
