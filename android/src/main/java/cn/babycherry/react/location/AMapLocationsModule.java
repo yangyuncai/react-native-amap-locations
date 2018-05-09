@@ -73,6 +73,7 @@ public class AMapLocationsModule extends ReactContextBaseJavaModule {
         coords.putDouble("latitude", aMapLocation.getLatitude());
         coords.putDouble("longitude", aMapLocation.getLongitude());
         coords.putDouble("altitude", aMapLocation.getAltitude());
+        coords.putString("address", aMapLocation.getAddress());
 
         // 标准化定位结果
         result.putInt("code", 0);
@@ -114,7 +115,7 @@ public class AMapLocationsModule extends ReactContextBaseJavaModule {
         handleOnceLocationChange(aMapLocation, promise);
       }
     };
-    AMapLocationClient aMapLocationClient = new AMapLocationClient(this.reactContext.getCurrentActivity());
+    AMapLocationClient aMapLocationClient = new AMapLocationClient(getCurrentActivity());
 
     // 单次定位
     aMapLocationClientOption.setOnceLocation(true);
