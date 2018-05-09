@@ -1,6 +1,6 @@
 {
   "name": "react-native-amap-locations",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "lite location wrapper above amap SDK.",
   "main": "index.js",
   "scripts": {},
