@@ -20,6 +20,14 @@
       "email": "hjj491229492@hotmail.com"
     }
   ],
+  "files": [
+    "android",
+    "gradle",
+    "lib",
+    "gradlew",
+    "gradlew.bat",
+    "yarn.lock"
+  ],
   "license": "MIT",
   "peerDependencies": {
     "react-native": "~0.55.2"
