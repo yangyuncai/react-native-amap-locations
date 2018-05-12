@@ -2,13 +2,23 @@
   "name": "react-native-amap-locations",
   "version": "0.1.6",
   "description": "lite location wrapper above amap SDK.",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {},
   "keywords": [
     "react-native"
   ],
-  "author": "huang.jian",
-  "license": "hjj491229492@hotmail.com",
+  "author": "yang.yuncai <383235388@qq.com>",
+  "contributors": [
+    {
+      "name": "yang.yuncai",
+      "email": "383235388@qq.com"
+    },
+    {
+      "name": "huang.jian",
+      "email": "hjj491229492@hotmail.com"
+    }
+  ],
+  "license": "MIT",
   "peerDependencies": {
     "react-native": "~0.55.2"
   }
