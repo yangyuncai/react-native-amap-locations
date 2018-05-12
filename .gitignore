@@ -67,6 +67,7 @@ fastlane/readme.md
 
 # NPM
 node_modules
+lib/
 
 # OSX / IDE
 .idea
