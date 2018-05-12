@@ -36,7 +36,10 @@
 import AmapLocations from 'react-native-amap-locations';
 
 // one time location
-Location.getCurrentPositionAsync(options)
+AmapLocations.getCurrentPositionAsync(options);
+
+// watch location
+AmapLocations.watchCurrentPositionAsync(options, callback);
 
 // response
 const result = {
@@ -45,8 +48,9 @@ const result = {
   coords: {
     altitude: 0, 
     longitude: 121.535718, 
-    latitude: 31.059184
-  },
+    latitude: 31.059184,
+    address: "上海市徐汇区复兴中路298号"
+  },
   description: '定位成功',
   timestamp: 1525612811812
 };
@@ -58,7 +62,8 @@ type LocationPurpose = "SignIn" | "Sport" | "Transport";
 
 interface Options {
     mode: LocationMode,
-    purpose: LocationPurpose
+    purpose: LocationPurpose,
+    interval: number // only within watch location, milliseconds
 }
 ```
 
