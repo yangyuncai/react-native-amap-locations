@@ -5,20 +5,21 @@ import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.facebook.react.bridge.Arguments;
-import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 public class AMapLocationsModule extends ReactContextBaseJavaModule {
-
+  private final static String AMapLocationEvent = "AMapLocationChange";
+  private static AMapLocationClient aMapWatchLocationClient = null;
   private final ReactApplicationContext reactContext;
 
   public AMapLocationsModule(ReactApplicationContext reactContext) {
@@ -37,6 +38,7 @@ public class AMapLocationsModule extends ReactContextBaseJavaModule {
       {
         put("LocationMode", getLocationModeTypes());
         put("LocationPurpose", getLocationPurposeTypes());
+        put("AMapLocationEvent", AMapLocationEvent);
       }
 
       private Map<String, Object> getLocationModeTypes() {
@@ -62,7 +64,7 @@ public class AMapLocationsModule extends ReactContextBaseJavaModule {
   }
 
   // 单次定位回调
-  private void handleOnceLocationChange(AMapLocation aMapLocation, Promise promise) {
+  private WritableMap semanticsAMapLocation(AMapLocation aMapLocation) {
     WritableMap result = Arguments.createMap();
 
     if (aMapLocation != null) {
@@ -89,10 +91,10 @@ public class AMapLocationsModule extends ReactContextBaseJavaModule {
       result.putString("description", "定位结果不存在");
     }
 
-    promise.resolve(result);
+    return result;
   }
 
-  private AMapLocationClientOption setAMapLocationOptions(final ReadableMap options) {
+  private AMapLocationClientOption setAMapOnceLocationOptions(final ReadableMap options) {
     String mode = options.getString("mode");
     String purpose = options.getString("purpose");
 
@@ -105,17 +107,38 @@ public class AMapLocationsModule extends ReactContextBaseJavaModule {
     return aMapLocationClientOption;
   }
 
+  private AMapLocationClientOption setAMapWatchLocationOptions(final ReadableMap options) {
+    String mode = options.getString("mode");
+    String purpose = options.getString("purpose");
+    Number interval = options.getInt("interval");
+
+    AMapLocationClientOption aMapLocationClientOption = new AMapLocationClientOption();
+    // 设置参数
+    aMapLocationClientOption
+        .setLocationMode(AMapLocationClientOption.AMapLocationMode.valueOf(mode))
+        .setInterval(interval.longValue());
+
+    if (purpose != null) {
+      aMapLocationClientOption.setLocationPurpose(AMapLocationClientOption.AMapLocationPurpose.valueOf(purpose));
+    }
+
+    return aMapLocationClientOption;
+  }
+
   @ReactMethod
   public void getCurrentPositionAsync(final ReadableMap options, final Promise promise) {
-    AMapLocationClientOption aMapLocationClientOption = setAMapLocationOptions(options);
+    final AMapLocationClientOption aMapLocationClientOption = setAMapOnceLocationOptions(options);
+    final AMapLocationClient aMapLocationClient = new AMapLocationClient(getReactApplicationContext());
+
     // 所有正常调用，Promise 皆为 resolve
+    // 获取数据后销毁定位服务实例，多次调用将重新实例化定位服务
     AMapLocationListener aMapLocationListener = new AMapLocationListener() {
       @Override
       public void onLocationChanged(AMapLocation aMapLocation) {
-        handleOnceLocationChange(aMapLocation, promise);
+        aMapLocationClient.onDestroy();
+        promise.resolve(semanticsAMapLocation(aMapLocation));
       }
     };
-    AMapLocationClient aMapLocationClient = new AMapLocationClient(getCurrentActivity());
 
     // 单次定位
     aMapLocationClientOption.setOnceLocation(true);
@@ -126,6 +149,29 @@ public class AMapLocationsModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void watchCurrentPositionAsync(ReadableMap options, Callback locationSuccessCallback, Callback locationFailureCallback) {
+  public void watchCurrentPositionAsync(ReadableMap options) {
+    final AMapLocationClientOption aMapLocationClientOption = setAMapWatchLocationOptions(options);
+    final AMapLocationClient aMapLocationClient = new AMapLocationClient(getCurrentActivity());
+    // SDK 无法定位认定为正常，JavaScript 端进行错误代码判断
+    AMapLocationListener aMapLocationListener = new AMapLocationListener() {
+      @Override
+      public void onLocationChanged(AMapLocation aMapLocation) {
+        reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+            .emit(AMapLocationEvent, semanticsAMapLocation(aMapLocation));
+      }
+    };
+
+    // 定位 watch 逻辑
+    aMapLocationClient.setLocationOption(aMapLocationClientOption);
+    aMapLocationClient.setLocationListener(aMapLocationListener);
+    aMapLocationClient.startLocation();
+  }
+
+  @ReactMethod
+  public void stopWatchCurrentPositionAsync() {
+    if (aMapWatchLocationClient != null) {
+      aMapWatchLocationClient.stopLocation();
+      aMapWatchLocationClient.onDestroy();
+    }
   }
 }
